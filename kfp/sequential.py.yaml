@@ -1,0 +1,65 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: sequential-pipeline-
+  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.7.1, pipelines.kubeflow.org/pipeline_compilation_time: '2021-08-21T13:47:39.244729',
+    pipelines.kubeflow.org/pipeline_spec: '{"description": "A pipeline with two sequential
+      steps.", "inputs": [{"default": "gs://ml-pipeline/sample-data/shakespeare/shakespeare1.txt",
+      "name": "url", "optional": true}], "name": "sequential-pipeline"}'}
+  labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.7.1}
+spec:
+  entrypoint: sequential-pipeline
+  templates:
+  - name: echo
+    container:
+      args: [echo "$0", '{{inputs.parameters.gcs-download-data}}']
+      command: [sh, -c]
+      image: library/bash:4.4.23
+    inputs:
+      parameters:
+      - {name: gcs-download-data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.7.1
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+  - name: gcs-download
+    container:
+      args: [gsutil cat $0 | tee $1, '{{inputs.parameters.url}}', /tmp/results.txt]
+      command: [sh, -c]
+      image: google/cloud-sdk:279.0.0
+    inputs:
+      parameters:
+      - {name: url}
+    outputs:
+      parameters:
+      - name: gcs-download-data
+        valueFrom: {path: /tmp/results.txt}
+      artifacts:
+      - {name: gcs-download-data, path: /tmp/results.txt}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.7.1
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+  - name: sequential-pipeline
+    inputs:
+      parameters:
+      - {name: url}
+    dag:
+      tasks:
+      - name: echo
+        template: echo
+        dependencies: [gcs-download]
+        arguments:
+          parameters:
+          - {name: gcs-download-data, value: '{{tasks.gcs-download.outputs.parameters.gcs-download-data}}'}
+      - name: gcs-download
+        template: gcs-download
+        arguments:
+          parameters:
+          - {name: url, value: '{{inputs.parameters.url}}'}
+  arguments:
+    parameters:
+    - {name: url, value: 'gs://ml-pipeline/sample-data/shakespeare/shakespeare1.txt'}
+  serviceAccountName: pipeline-runner
