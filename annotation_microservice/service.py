@@ -12,7 +12,8 @@ from flask_restplus import Resource, Api, reqparse
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 
-from db_driver import if_table_exists, create_table, insert_data
+from db_driver import if_table_exists, create_table, insert_data, truncate_table, drop_table, get_all_data, \
+    get_study_from_to
 
 
 def current_milli_time():
@@ -51,21 +52,162 @@ def create_app():
 
     CORS(app)
 
-    upload_parser = reqparse.RequestParser()
-    upload_parser.add_argument('file',
-                               location='files',
-                               type=FileStorage,
-                               help='The zip of all the dog and cat images',
-                               required=True)
+    from_to_parser = reqparse.RequestParser()
+    from_to_parser.add_argument('from',
+                                type=str,
+                                help='from date',
+                                required=True)
+    from_to_parser.add_argument('to',
+                                type=str,
+                                help='to date',
+                                required=True)
 
-    @api.route('/upload')
-    @api.expect(upload_parser)
-    class UploadService(Resource):
-        @api.expect(upload_parser)
+    @api.route('/get_data_from_to')
+    @api.expect(from_to_parser)
+    class FromToService(Resource):
+        @api.expect(from_to_parser)
         @api.doc(responses={"response": 'json'})
         def post(self):
             try:
-                args = upload_parser.parse_args()
+                args = from_to_parser.parse_args()
+            except Exception as e:
+                rv = dict()
+                rv['health'] = str(e)
+                return rv, 404
+            try:
+                from_date = args['from']
+                to_date = args['to']
+                ret_dict, ret_str = get_study_from_to(from_date, to_date)
+                if ret_str != "Success":
+                    rv = dict()
+                    rv['status'] = ret_str
+                    return rv, 404
+                else:
+                    return ret_dict, 200
+            except Exception as e:
+                rv = dict()
+                rv['status'] = str(e)
+                return rv, 404
+
+    get_all_data_parser = reqparse.RequestParser()
+    get_all_data_parser.add_argument('table_name',
+                                     type=str,
+                                     help='List all data of this table name',
+                                     required=True)
+
+    @api.route('/get_all_data')
+    @api.expect(get_all_data_parser)
+    class GetAllDataService(Resource):
+        @api.expect(get_all_data_parser)
+        @api.doc(responses={"response": 'json'})
+        def post(self):
+            try:
+                args = get_all_data_parser.parse_args()
+            except Exception as e:
+                rv = dict()
+                rv['status'] = str(e)
+                return rv, 404
+            try:
+                table_name = args['table_name']
+                if if_table_exists(table_name=table_name):
+                    ret_dict, ret_str = get_all_data(table_name=table_name)
+                    return ret_dict, 200
+                else:
+                    rv = dict()
+                    rv['status'] = table_name + " doesn't exist!"
+                    return rv, 404
+            except Exception as e:
+                rv = dict()
+                rv['status'] = str(e)
+                return rv, 404
+
+    drop_table_parser = reqparse.RequestParser()
+    drop_table_parser.add_argument('table_name',
+                                   type=str,
+                                   help='The Table to be destroyed/dropped',
+                                   required=True)
+
+    @api.route('/drop_table')
+    @api.expect(drop_table_parser)
+    class DropTableService(Resource):
+        @api.expect(drop_table_parser)
+        @api.doc(responses={"response": 'json'})
+        def post(self):
+            try:
+                args = drop_table_parser.parse_args()
+            except Exception as e:
+                rv = dict()
+                rv['status'] = str(e)
+                return rv, 404
+            try:
+                table_name = args['table_name']
+                if if_table_exists(table_name=table_name):
+                    ret, status = drop_table(table_name)
+                else:
+                    status = table_name + " doesn't exist!"
+                    ret = -1
+                rv = dict()
+                rv['status'] = status
+                if ret == 0:
+                    return rv, 200
+                else:
+                    return rv, 404
+            except Exception as e:
+                rv = dict()
+                rv['status'] = str(e)
+                return rv, 404
+
+    truncate_table_parser = reqparse.RequestParser()
+    truncate_table_parser.add_argument('table_name',
+                                       type=str,
+                                       help='The Table to be truncated',
+                                       required=True)
+
+    @api.route('/truncate_table')
+    @api.expect(truncate_table_parser)
+    class TruncateTableService(Resource):
+        @api.expect(truncate_table_parser)
+        @api.doc(responses={"response": 'json'})
+        def post(self):
+            try:
+                args = truncate_table_parser.parse_args()
+            except Exception as e:
+                rv = dict()
+                rv['status'] = str(e)
+                return rv, 404
+            try:
+                table_name = args['table_name']
+                if if_table_exists(table_name=table_name):
+                    ret, status = truncate_table(table_name)
+                else:
+                    status = table_name + " doesn't exist!"
+                    ret = -1
+                rv = dict()
+                rv['status'] = status
+                if ret == 0:
+                    return rv, 200
+                else:
+                    return rv, 404
+            except Exception as e:
+                rv = dict()
+                rv['status'] = str(e)
+                return rv, 404
+
+    annotate_parser = reqparse.RequestParser()
+    annotate_parser.add_argument('file',
+                                 location='files',
+                                 type=FileStorage,
+                                 help='The zip of all the dog and cat images',
+                                 required=True)
+
+    @api.route('/annotate')
+    @api.expect(annotate_parser)
+    class AnnotationService(Resource):
+        @api.expect(annotate_parser)
+        @api.doc(responses={"response": 'json'})
+        def post(self):
+            try:
+                args = annotate_parser.parse_args()
             except Exception as e:
                 rv = dict()
                 rv['status'] = str(e)
@@ -93,7 +235,7 @@ def create_app():
                             _id = str(current_milli_time())
                             label = 'cat'
                             image = os.path.join(cat_dir, cat_file)
-                            ret, status = insert_data(_id, label, image)
+                            ret, status = insert_data(_id, label, cat_file, image)
                             if ret != 0:
                                 with_errors = 1
                                 print(status)
@@ -101,7 +243,7 @@ def create_app():
                             _id = str(current_milli_time())
                             label = 'dog'
                             image = os.path.join(dog_dir, dog_file)
-                            ret, status = insert_data(_id, label, image)
+                            ret, status = insert_data(_id, label, dog_file, image)
                             if ret != 0:
                                 with_errors = 1
                                 print(status)
