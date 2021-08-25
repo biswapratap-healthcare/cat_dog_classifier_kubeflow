@@ -1,3 +1,4 @@
+import base64
 import psycopg2
 from datetime import datetime, timezone
 
@@ -118,7 +119,11 @@ def get_study_from_to(from_date, to_date, table_name='train_data'):
             one_rec['Label'] = str(record[1])
             one_rec['Date'] = str(record[2])
             one_rec['Name'] = str(record[3])
-            one_rec['Image'] = str(record[4])
+            # fp = open(one_rec['Name'], "wb")
+            # fp.write(bytes(record[4]))
+            # fp.close()
+            data = base64.b64encode(bytes(record[4]))
+            one_rec['Image'] = str(data)[1:]
             ret_dict[str(idx)] = one_rec
             idx += 1
         cur.close()
@@ -152,7 +157,8 @@ def get_all_data(table_name='train_data'):
             one_rec['Label'] = str(record[1])
             one_rec['Date'] = str(record[2])
             one_rec['Name'] = str(record[3])
-            one_rec['Image'] = str(record[4])
+            data = base64.b64encode(bytes(record[4]))
+            one_rec['Image'] = str(data)[1:]
             ret_dict[str(idx)] = one_rec
             idx += 1
         cur.close()

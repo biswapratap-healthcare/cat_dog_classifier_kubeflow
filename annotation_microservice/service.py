@@ -3,6 +3,7 @@ import shutil
 import tempfile
 import time
 import zipfile
+from PIL import Image
 
 from waitress import serve
 from flask_cors import CORS
@@ -14,6 +15,7 @@ from werkzeug.datastructures import FileStorage
 
 from db_driver import if_table_exists, create_table, insert_data, truncate_table, drop_table, get_all_data, \
     get_study_from_to
+from utils import get_image
 
 
 def current_milli_time():
@@ -234,7 +236,7 @@ def create_app():
                         for cat_file in cat_files:
                             _id = str(current_milli_time())
                             label = 'cat'
-                            image = os.path.join(cat_dir, cat_file)
+                            image = get_image(cat_dir, cat_file)
                             ret, status = insert_data(_id, label, cat_file, image)
                             if ret != 0:
                                 with_errors = 1
@@ -242,7 +244,7 @@ def create_app():
                         for dog_file in dog_files:
                             _id = str(current_milli_time())
                             label = 'dog'
-                            image = os.path.join(dog_dir, dog_file)
+                            image = get_image(dog_dir, dog_file)
                             ret, status = insert_data(_id, label, dog_file, image)
                             if ret != 0:
                                 with_errors = 1
