@@ -180,8 +180,10 @@ def insert_data(_id, label, name, image):
         created_date = datetime.now(timezone.utc)
         data_bytes = b''
         with open(image, "rb") as f:
-            while byte := f.read(1):
+            byte = f.read(1)
+            while byte:
                 data_bytes += byte
+                byte = f.read(1)
         sql = """INSERT INTO train_data VALUES (%s,%s,%s,%s,%s) RETURNING ID;"""
         conn = psycopg2.connect(host=handle,
                                 database=database,
