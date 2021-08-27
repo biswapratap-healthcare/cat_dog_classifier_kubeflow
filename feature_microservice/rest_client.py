@@ -4,8 +4,8 @@ import requests
 from datetime import datetime
 
 
-handle = "localhost"
-# handle = "34.87.16.166"
+# handle = "localhost"
+handle = "34.68.53.253"
 
 
 def fetch():
