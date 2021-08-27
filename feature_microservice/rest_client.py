@@ -22,8 +22,5 @@ def fetch():
     td = list()
     for _id, value in content.items():
         data = base64.b64decode(value['Image'])
-        # fp = open(value['Name'], "wb")
-        # fp.write(data)
-        # fp.close()
         td.append([value['Label'], data])
     return td
