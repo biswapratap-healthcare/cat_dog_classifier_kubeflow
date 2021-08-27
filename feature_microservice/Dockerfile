@@ -1,4 +1,4 @@
-FROM gcr.io/google-appengine/python
+FROM python:3.8-slim-buster
 RUN mkdir /feature_microservice
 COPY main.py /feature_microservice
 COPY rest_client.py /feature_microservice
