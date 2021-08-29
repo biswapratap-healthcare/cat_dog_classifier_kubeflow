@@ -12,5 +12,6 @@ dist
 *.spec
 dicom_files
 *.pkl
+*.h5
 
 

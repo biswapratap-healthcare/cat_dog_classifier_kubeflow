@@ -3,7 +3,6 @@ import shutil
 import tempfile
 import time
 import zipfile
-from PIL import Image
 
 from waitress import serve
 from flask_cors import CORS
