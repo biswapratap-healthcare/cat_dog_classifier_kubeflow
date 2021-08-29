@@ -38,7 +38,7 @@ def upload_to_bucket(bucket_name, destination_file_name, upload_file_name):
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
     DESTINATION_FILENAME = 'td.pkl'
-    BUCKET = 'gir-poc-cat-dog'
+    BUCKET = 'gir-poc-cat-dog-1'
 
     training_data = list()
     model = init()
