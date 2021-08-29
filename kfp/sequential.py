@@ -2,36 +2,29 @@ import kfp
 from kfp import dsl
 
 
-def gcs_download_op(url):
+def gcs_download_op():
     return dsl.ContainerOp(
-        name='GCS - Download',
-        image='google/cloud-sdk:279.0.0',
-        command=['sh', '-c'],
-        arguments=['gsutil cat $0 | tee $1', url, '/tmp/results.txt'],
-        file_outputs={
-            'data': '/tmp/results.txt',
-        }
+        name='Get Feature Microservice',
+        image='bpc999/cat-dog:feature_ms',
     )
 
 
-def echo_op(text):
+def echo_op():
     return dsl.ContainerOp(
-        name='echo',
-        image='library/bash:4.4.23',
-        command=['sh', '-c'],
-        arguments=['echo "$0"', text]
+        name='Training Microservice',
+        image='bpc999/cat-dog:train_ms',
     )
 
 
 @dsl.pipeline(
-    name='sequential-pipeline',
-    description='A pipeline with two sequential steps.'
+    name='cat-dog-pipeline',
+    description='A pipeline with two sequential steps of extracting features and training.'
 )
-def sequential_pipeline(url='gs://ml-pipeline/sample-data/shakespeare/shakespeare1.txt'):
+def sequential_pipeline():
     """A pipeline with two sequential steps."""
 
-    download_task = gcs_download_op(url)
-    echo_task = echo_op(download_task.output)
+    download_task = gcs_download_op()
+    echo_task = echo_op()
 
 
 if __name__ == '__main__':
