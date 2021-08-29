@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 # handle = "localhost"
-handle = "34.93.174.195"
+handle = "35.226.195.51"
 
 
 def fetch():
