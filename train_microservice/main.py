@@ -8,9 +8,14 @@ if __name__ == "__main__":
     SOURCE_FILENAME = 'td.pkl'
 
     download_from_bucket(BUCKET, SOURCE_FILENAME, SOURCE_FILENAME)
+    logging.info("Downloaded training data from bucket.")
     with open(SOURCE_FILENAME, 'rb') as f:
         training_data = pickle.load(f)
     os.remove(SOURCE_FILENAME)
+    logging.info("Found " + str(len(training_data)) + " training entries.")
     model = DeepClassification(training_data)
+    logging.info("Built deep classification model.")
     model.prepare_training_data()
+    logging.info("Prepared data for training.")
     model.train()
+    logging.info("Training completed.")

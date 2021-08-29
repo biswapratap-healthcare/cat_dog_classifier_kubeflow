@@ -11,3 +11,6 @@ sudo apt-get install gcc
 sudo apt-get install python3-dev -y
 sudo apt-get install python3-venv -y
 sudo apt-get install libpq-dev python-dev -y
+sudo apt install docker.io -y
+sudo groupadd docker
+sudo usermod -aG docker ${USER}
