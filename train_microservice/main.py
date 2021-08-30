@@ -8,12 +8,12 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
     parser = argparse.ArgumentParser()
     parser.add_argument('--file',
-                        type=str,
+                        type=argparse.FileType('r'),
                         required=True,
                         help='The file.')
     args = parser.parse_args()
-    with open(args.file, 'r') as f:
-        d = f.read()
+    with args.file as file:
+        d = file.read()
     logging.info(d)
     SOURCE_FILENAME = 'td.pkl'
 
