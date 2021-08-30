@@ -5,7 +5,7 @@ from kfp import dsl
 def feature_op(project, mode, bucket, handle):
     return dsl.ContainerOp(
         name='Get Feature Microservice',
-        image='bpc999/cat-dog:feature_ms',
+        image='bpc999/cat-dog:feature_microservice',
         arguments=[
             '--project', project,
             '--mode', mode,
@@ -19,7 +19,7 @@ def feature_op(project, mode, bucket, handle):
 def training_op(feature_op_container):
     return dsl.ContainerOp(
         name='Training Microservice',
-        image='bpc999/cat-dog:train_ms',
+        image='bpc999/cat-dog:train_microservice',
         arguments=[
             '--file', feature_op_container.outputs['file_output']
         ]
@@ -33,8 +33,8 @@ def training_op(feature_op_container):
 def sequential_pipeline():
     """A pipeline with two sequential steps."""
 
-    download_task = feature_op('cat-dog', 'cloud', 'cat-dog-bucket-2', '104.198.180.139')
-    echo_task = training_op(download_task)
+    feature_task = feature_op('cat-dog', 'cloud', 'cat-dog-bucket-2', '104.198.180.139')
+    training_task = training_op(feature_task)
 
 
 if __name__ == '__main__':
