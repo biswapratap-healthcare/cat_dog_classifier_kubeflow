@@ -19,9 +19,9 @@ def feature_op(project, mode, bucket, handle):
 def training_op(feature_op_container):
     return dsl.ContainerOp(
         name='Training Microservice',
-        image='bpc999/cat-dog:train_microservice',
+        image='bpc999/cat-dog:train_microservice_1',
         arguments=[
-            '--file', feature_op_container.outputs['file_output']
+            '--content', feature_op_container.outputs['file_output']
         ]
     )
 
