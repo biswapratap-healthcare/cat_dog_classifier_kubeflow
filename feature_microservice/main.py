@@ -50,18 +50,23 @@ if __name__ == "__main__":
     parser.add_argument('--mode',
                         choices=['local', 'cloud'],
                         help='whether to run the job locally or in Cloud Dataflow.')
+    parser.add_argument('--handle',
+                        type=str,
+                        required=True,
+                        help='The annotation service handle.')
 
     args = parser.parse_args()
     logging.info("Project --> " + str(args.project) + ".")
     logging.info("Bucket --> " + str(args.bucket) + ".")
     logging.info("Mode --> " + str(args.mode) + ".")
+    logging.info("Handle --> " + str(args.handle) + ".")
 
     DESTINATION_FILENAME = 'td.pkl'
     BUCKET = 'gir-poc-cat-dog-1'
 
     training_data = list()
     model = init()
-    training_image_data = fetch()
+    training_image_data = fetch(args.handle)
     logging.info("Found " + str(len(training_image_data)) + " training entries.")
     for td in training_image_data:
         np_arr = np.fromstring(td[1], np.uint8)

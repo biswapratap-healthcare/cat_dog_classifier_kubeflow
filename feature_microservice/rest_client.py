@@ -4,11 +4,7 @@ import requests
 from datetime import datetime
 
 
-# handle = "localhost"
-handle = "35.226.195.51"
-
-
-def fetch():
+def fetch(handle):
     # d_date = datetime.today().strftime('%Y-%m-%d').split('-')
     d_date = "2021-08-25".split('-')
     year = d_date[0]

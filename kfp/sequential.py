@@ -2,14 +2,15 @@ import kfp
 from kfp import dsl
 
 
-def feature_op(project, mode, bucket):
+def feature_op(project, mode, bucket, handle):
     return dsl.ContainerOp(
         name='Get Feature Microservice',
         image='bpc999/cat-dog:feature_ms',
         arguments=[
             '--project', project,
             '--mode', mode,
-            '--bucket', bucket
+            '--bucket', bucket,
+            '--handle', handle
         ],
         file_outputs={'file_output': '/output.txt'}
     )
@@ -32,7 +33,7 @@ def training_op(feature_op_container):
 def sequential_pipeline():
     """A pipeline with two sequential steps."""
 
-    download_task = feature_op('cat-dog', 'cloud', 'cat-dog-bucket-2')
+    download_task = feature_op('cat-dog', 'cloud', 'cat-dog-bucket-2', '104.198.180.139')
     echo_task = training_op(download_task)
 
 
