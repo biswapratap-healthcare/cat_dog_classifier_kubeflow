@@ -2,17 +2,26 @@ import kfp
 from kfp import dsl
 
 
-def gcs_download_op():
+def feature_op(project, mode, bucket):
     return dsl.ContainerOp(
         name='Get Feature Microservice',
         image='bpc999/cat-dog:feature_ms',
+        arguments=[
+            '--project', project,
+            '--mode', mode,
+            '--bucket', bucket
+        ],
+        file_outputs={'file_output': '/output.txt'}
     )
 
 
-def echo_op():
+def training_op(feature_op_container):
     return dsl.ContainerOp(
         name='Training Microservice',
         image='bpc999/cat-dog:train_ms',
+        arguments=[
+            '--file', feature_op_container.outputs['file_output']
+        ]
     )
 
 
@@ -23,8 +32,8 @@ def echo_op():
 def sequential_pipeline():
     """A pipeline with two sequential steps."""
 
-    download_task = gcs_download_op()
-    echo_task = echo_op()
+    download_task = feature_op('cat-dog', 'cloud', 'cat-dog-bucket-2')
+    echo_task = training_op(download_task)
 
 
 if __name__ == '__main__':

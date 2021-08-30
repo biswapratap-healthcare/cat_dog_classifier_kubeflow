@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 import pickle
@@ -5,6 +6,15 @@ from train import DeepClassification, download_from_bucket, BUCKET
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--file',
+                        type=str,
+                        required=True,
+                        help='The file.')
+    args = parser.parse_args()
+    with open(args.file, 'r') as f:
+        d = f.read()
+    logging.info(d)
     SOURCE_FILENAME = 'td.pkl'
 
     download_from_bucket(BUCKET, SOURCE_FILENAME, SOURCE_FILENAME)

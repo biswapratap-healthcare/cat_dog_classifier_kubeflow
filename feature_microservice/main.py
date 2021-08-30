@@ -1,3 +1,4 @@
+import argparse
 import os
 import cv2
 import pickle
@@ -37,6 +38,24 @@ def upload_to_bucket(bucket_name, destination_file_name, upload_file_name):
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--project',
+                        type=str,
+                        required=True,
+                        help='The GCP project to run the dataflow job.')
+    parser.add_argument('--bucket',
+                        type=str,
+                        required=True,
+                        help='Bucket to store outputs.')
+    parser.add_argument('--mode',
+                        choices=['local', 'cloud'],
+                        help='whether to run the job locally or in Cloud Dataflow.')
+
+    args = parser.parse_args()
+    logging.info("Project --> " + str(args.project) + ".")
+    logging.info("Bucket --> " + str(args.bucket) + ".")
+    logging.info("Mode --> " + str(args.mode) + ".")
+
     DESTINATION_FILENAME = 'td.pkl'
     BUCKET = 'gir-poc-cat-dog-1'
 
@@ -55,3 +74,12 @@ if __name__ == "__main__":
     upload_to_bucket(BUCKET, DESTINATION_FILENAME, DESTINATION_FILENAME)
     logging.info("Uploaded training data to the bucket " + BUCKET + ".")
     os.remove(DESTINATION_FILENAME)
+
+    with open('bucket.txt', 'w') as f:
+        f.write("Hello from Feature Extraction Microservice")
+    upload_to_bucket(args.bucket, 'bucket.txt', 'bucket.txt')
+    os.remove('bucket.txt')
+
+    with open("/output.txt", "w") as output_file:
+        output_file.write("This is the content of the output.txt file in Feature Extraction microservice.")
+        print("Done!")
